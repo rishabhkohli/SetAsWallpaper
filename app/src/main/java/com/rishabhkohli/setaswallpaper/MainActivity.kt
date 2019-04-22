@@ -19,7 +19,12 @@ import android.util.DisplayMetrics
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils
+import java.io.File
 import java.security.MessageDigest
+import java.nio.file.Files.delete
+import java.nio.file.Files.isDirectory
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -82,7 +87,8 @@ class MainActivity : AppCompatActivity() {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
-    class CenterCropTOScreenSizeKeepingAspectRatio(private val screenWidth: Int, private val screenHeight: Int) : BitmapTransformation() {
+    class CenterCropTOScreenSizeKeepingAspectRatio(private val screenWidth: Int, private val screenHeight: Int) :
+        BitmapTransformation() {
         override fun transform(pool: BitmapPool, toTransform: Bitmap, outWidth: Int, outHeight: Int): Bitmap {
             if (toTransform.width == outWidth && toTransform.height == outHeight) {
                 return toTransform
@@ -110,9 +116,42 @@ class MainActivity : AppCompatActivity() {
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
         return displayMetrics.heightPixels
     }
+
     private fun getScreenWidth(): Int {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
         return displayMetrics.widthPixels
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        deleteCache()
+    }
+
+    private fun deleteCache() {
+        try {
+            deleteDir(cacheDir)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+    private fun deleteDir(dir: File?): Boolean {
+        if (dir != null && dir.isDirectory) {
+            val children = dir.list()
+            for (i in children.indices) {
+                if (!deleteDir(File(dir, children[i]))) {
+                    return false
+                }
+            }
+            return dir.delete()
+        } else {
+            return if (dir != null && dir.isFile) {
+                dir.delete()
+            } else {
+                false
+            }
+        }
     }
 }
