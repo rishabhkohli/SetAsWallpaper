@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Set as Wallpaper</string>
+    <string name="wallpaper_preview">Wallpaper Preview</string>
+    <string name="set_wallpaper">Set Wallpaper</string>
+</resources>
