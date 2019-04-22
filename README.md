@@ -5,8 +5,12 @@ I love changing my wallpaper everyday with images I find on reddit. But the proc
 Hence this app. 
 
 It has no launcher icon. It will just be present in the share sheet if you are trying to share an image.
-
+___
+#### Download links
+[Github releases](https://github.com/rishabhkohli/SetAsWallpaper/releases/latest)
+___
+#### Screenshots
 ![Screenshot 1](screenshots/Screenshot_1.jpg)
-
+___
 #### Credits
-Icon made by [Smashicons](https://www.flaticon.com/authors/smashicons) from [www.flaticon.com]()
+[Icon](https://www.flaticon.com/free-icon/wallpaper_1096245) made by [Smashicons](https://www.flaticon.com/authors/smashicons) from [www.flaticon.com]()
