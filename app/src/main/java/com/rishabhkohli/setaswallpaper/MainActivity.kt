@@ -2,30 +2,20 @@ package com.rishabhkohli.setaswallpaper
 
 import android.app.WallpaperManager
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
-import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.concurrent.thread
 import android.view.Menu
 import android.view.MenuItem
-import android.graphics.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.drawToBitmap
-import android.graphics.Bitmap
-import android.util.DisplayMetrics
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
-import com.bumptech.glide.load.resource.bitmap.TransformationUtils
+import com.davemorrissey.labs.subscaleview.ImageSource
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import java.security.MessageDigest
-import java.nio.file.Files.delete
-import java.nio.file.Files.isDirectory
-
-
-
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,13 +23,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        imageView.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP)
+
         val actionBar = supportActionBar
         actionBar?.setBackgroundDrawable(ColorDrawable(Color.parseColor("#60000000")))
         actionBar?.title = ""
 
-        if ((intent?.action == Intent.ACTION_SEND || intent?.action == Intent.ACTION_ATTACH_DATA) && intent.type?.startsWith(
-                "image/"
-            ) == true
+        if ((intent?.action == Intent.ACTION_SEND || intent?.action == Intent.ACTION_ATTACH_DATA)
+            && intent.type?.startsWith("image/") == true
         ) {
             val uri: Uri? =
                 when {
@@ -67,12 +58,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleReceivedImage(uri: Uri) {
-        Glide.with(this)
-            .asBitmap()
-            .load(uri)
-            .transform(CenterCropTOScreenSizeKeepingAspectRatio(getScreenWidth(), getScreenHeight()))
-            .thumbnail(0.5f)
-            .into(imageView)
+        imageView.setImage(ImageSource.uri(uri))
     }
 
     private fun setWallpaper() {
@@ -87,45 +73,10 @@ class MainActivity : AppCompatActivity() {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
-    class CenterCropTOScreenSizeKeepingAspectRatio(private val screenWidth: Int, private val screenHeight: Int) :
-        BitmapTransformation() {
-        override fun transform(pool: BitmapPool, toTransform: Bitmap, outWidth: Int, outHeight: Int): Bitmap {
-            if (toTransform.width == outWidth && toTransform.height == outHeight) {
-                return toTransform
-            }
-
-            val originalHeight = toTransform.height
-            val originalWidth = toTransform.width
-
-            var newHeight = screenHeight
-            var newWidth = (originalWidth / (originalHeight / screenHeight.toFloat())).toInt()
-            if (newWidth < screenWidth) {
-                newWidth = screenWidth
-                newHeight = (originalHeight / (originalWidth / screenWidth.toFloat())).toInt()
-            }
-
-            return TransformationUtils.centerCrop(pool, toTransform, newWidth, newHeight)
-        }
-
-        override fun updateDiskCacheKey(messageDigest: MessageDigest) {
-        }
-    }
-
-    private fun getScreenHeight(): Int {
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-        return displayMetrics.heightPixels
-    }
-
-    private fun getScreenWidth(): Int {
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-        return displayMetrics.widthPixels
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         deleteCache()
+        imageView.recycle()
     }
 
     private fun deleteCache() {
@@ -134,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 
     private fun deleteDir(dir: File?): Boolean {
